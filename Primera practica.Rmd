@@ -1,0 +1,142 @@
+---
+title: "Primera Práctica"
+author: "Equipo 8: -Flavio Cesar Palacios Salas - Berlin Isabel Preciado Escalera - Daniel Orozco Gomez"
+date: "07-02-2022"
+output: rmdformats::readthedown
+---
+
+# Simulación de procesos
+
+## Proceso de Wiener
+
+En este código simularemos un proceso de Wiener Generalizado y observaremos la variable que siga un comportamiento de ese tipo
+
+$$
+dW = \epsilon\sqrt{dt}
+$$
+
+**Donde:**
+
+$\epsilon ~ N(0,1)$
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+### Carga de paqueterías para cargar datos y graficar
+library(tidyverse)
+```
+
+```{r echo=FALSE, include=FALSE}
+set.seed(123)
+sim <- 100000
+dt <- 1/sim
+epsilon <- rnorm(n=sim, mean = 0, sd = 1)
+dw <- epsilon*sqrt(dt)
+```
+
+```{r}
+datos <- tibble(t=seq(1/sim,1,by=dt),dw)
+ggplot(datos)+
+  geom_line(aes(x=t,y=dw))
+```
+
+```{r echo=FALSE}
+datos <- tibble(t = seq(dt,1,by= dt),dw)
+ggplot(datos)+
+  geom_line(aes(x=t,y=dw), color = "#C70039")+
+  labs(x= "Tiempo",y = "dW", title = "Proceso de Wiener")
+```
+
+## Proceso de Wiener Generalizad
+
+¿cómo sería W? $$W_t = W_{t-1} +dW_t$$
+
+```{r}
+W <- 0
+W[1] <- 0
+for (t in 2:sim){
+  W[t] = W[t-1]+dw[t]
+}
+datos <- mutate(datos,W=W)
+```
+
+```{r, echo=FALSE, message=FALSE}
+ggplot(datos)+
+  geom_line(aes(x=t, y=W), color = "#C70039")+
+  geom_smooth(aes(x=t,y=W),method="lm", color = "black")
+```
+
+## Proceso de Wiener Generalizado
+En este caso
+$$ dX = adt+bdw$$
+
+```{r}
+a <- 0.3
+b <- 0.15
+dx <-  a*dt+b*dw
+plot(dx,type = 'l')
+```
+Ahora X, sería
+$$X_t = X_{t-1}+dX_t$$
+```{r}
+X <- 0
+X[1] <-0
+for (t in 2:sim){
+  X[t] = X[t-1]+dx[t]
+}
+datos <- mutate(datos,X=X)
+```
+
+```{r,echo = FALSE, message=FALSE}
+ggplot(datos)+
+  geom_line(aes(x=t, y=X), color = "#C70039")+
+  geom_smooth(aes(x=t,y=X),method="lm", color = "Black")
+```
+
+## Resolviendo un problema
+Una determinada variable sigue un proceso de WG con una drift rate de 2 y una tasa de varianza de 4. Ambas con unidad de tiempo semestral. Si el día de hoy la variable X toma el valor de 50.
+1 año
+$$dX = 4+2\sqrt{2} \epsilon$$
+$$X=50+dX$$
+$$X=54+2\sqrt{2}\epsilon$$
+¿Cuál es el valor esperado y la varianza de X dentro de 1 año?
+```{r}
+dxa <- 4+2*sqrt(2)*epsilon
+Xa <- 50+dxa
+```
+
+```{r}
+mean(Xa)
+var(Xa)
+```
+
+¿Cuáles son las probabilidades de que el cambio en X sea mayor a cero?
+```{r}
+mean(dxa<0)
+```
+
+¿Cuáles son las probabilidades de que el cambio en X sea mayor a cero?
+```{r}
+mean((50<Xa)&(Xa<=51))
+```
+
+## Problemas
+
+### Primero
+I) A company’s cash position, measured in millions of dollars, follows a generalized. Wiener process with a drift rate of 0.5 per quarter and a variance rate of 4.0 per quarter. How high does the company’s initial cash position have to be for the company to have a less than 5% chance of a negative cash position by the end of 1 year? To solve this, follow the next steps;
+
+1) Identify a and b for the generalized Wiener Process.
+2) Write the equation dx using a and b. That equation helps us to solve the problem and is specific for this problem. 
+3) Using 2) write the equation dx when dt=4 (fourth quarters or one year)
+4) Suppose that the initial cash position is Xo. Write the equation for X (not for dx)
+5) Find the expected value and variance of X
+6) Using 5) find P(X<0). Normalize and use normal standard distribution. If you are doing good, you should get a result that depends on Xo. Now your job is to find this value. 
+7) Equalize de result on 6) to -1.65 (because you want less than 5% chance of a negative position). And solve for Xo.
+8) Use R to prove your answer. Simulate the equation X=Xo+adt+bdW using the Xo you found on 7) with dt=4 and a,b for the problem. Once you have at least 10000 simulations for X, calculate its mean and variance. Finally, use pnorm(0, mean(X), sd(X)) to find the probability that X (initial cash position) has to be less than zero. 
+
+### Segundo
+II) A company’s cash position, measured in millions of dollars, follows a generalized Wiener process with a drift rate of 0.1 per month and a variance rate of 0.16 per month. The initial cash position is 2.0.
+
+(a) What are the probability distributions of the cash position after 1 month, 6 months, and 1 year?
+(b) What are the probabilities of a negative cash position at the end of 6 months and 1 year?
+(c) Use R to simulate the process and make a graph where you can see the relation between t form 1 to 40 months and the evolution of the probability 
+Hint: to solve this problem, use the same steps on I)

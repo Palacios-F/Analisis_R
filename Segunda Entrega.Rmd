@@ -1,0 +1,30 @@
+---
+title: "Analisis del Riesgo Segunda Entrega"
+author: "Equipo 8: -Flavio Cesar Palacios Salas - Berlin Isabel Preciado Escalera - Daniel Orozco Gomez"
+date: "07-02-2022"
+output: rmdformats::robobook
+theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+### Carga de paqueterías para cargar datos y graficar
+library(tidyquant)
+```
+
+```{r echo=FALSE, message=FALSE, include = FALSE}
+options("getSymbols.warning4.0"=FALSE)
+options("getSymbols.yahoo.warning"=FALSE)
+# Descarga de los datos historicos de los últimos cinco años
+
+getSymbols("BOLSAA.MX", from = '2008-06-13',
+           to = "2022-02-11",warnings = FALSE,
+           auto.assign = TRUE)
+```
+
+# Análisis histórico del precio y de los rendimientos de Bolsa Mexicana de Valores. Causas de cambios
+
+```{r echo=FALSE}
+chart_Series(BOLSAA.MX)
+```
+
