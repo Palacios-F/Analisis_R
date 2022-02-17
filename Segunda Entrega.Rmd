@@ -10,7 +10,18 @@ theme: cosmo
 knitr::opts_chunk$set(echo = TRUE)
 ### Carga de paqueterías para cargar datos y graficar
 library(tidyquant)
+library(PerformanceAnalytics)
+library(tidyverse)
+library(moments)
+library(lubridate)
+library(patchwork)
+
+anual <- read_csv("PIB reducido.csv")
+anual <- anual %>% 
+  as_tibble()
 ```
+
+
 
 ```{r echo=FALSE, message=FALSE, include = FALSE}
 options("getSymbols.warning4.0"=FALSE)
@@ -23,8 +34,68 @@ getSymbols("BOLSAA.MX", from = '2008-06-13',
 ```
 
 # Análisis histórico del precio y de los rendimientos de Bolsa Mexicana de Valores. Causas de cambios
+```{r echo=FALSE, message=FALSE, include = FALSE}
+clave <- c("BOLSAA.MX")
+getSymbols(clave, warnings = FALSE)
+lista <- lapply(clave, function(x) Cl(get(x)))
+precio <- (do.call(merge,lista))
+```
 
 ```{r echo=FALSE}
-chart_Series(BOLSAA.MX)
+chart_Series(BOLSAA.MX,name = paste("Rendimientos logarítmicos de " ,clave))
 ```
+Los rendimientos se obtuvieron de la siguiente forma:
+$$R_t = ln P_{t+1} - ln P_t$$
+Donde :
+$P_t = \text{Precio del activo en el tiempo t}$
+
+```{r echo=FALSE}
+chart_Series(na.omit(diff(log(na.omit(BOLSAA.MX)))),name = paste("Rendimientos logarítmicos de " ,clave))
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, include = FALSE}
+y <- year(precio)
+Est_Prin3 <- BOLSAA.MX %>%
+  as_tibble() %>% 
+  mutate(yea = y) %>% 
+  group_by(yea) %>% 
+  summarise(Mean = mean(BOLSAA.MX.Adjusted))
+```
+
+
+```{r echo=FALSE, message=FALSE, include = FALSE}
+Rend <- na.omit(diff(log(na.omit(Est_Prin3$Mean))))
+Rend2 <- na.omit(diff(log(na.omit(anual$PIB))))
+
+df <- data.frame(
+  x = 2009:1:2021,
+  PIB = Rend[1:13]*100,
+  BOLSAA.MX = Rend2*100)
+df <-df%>%
+  as_tibble()%>%
+  pivot_longer(cols = -c(x),
+               names_to = "serie", values_to = "value")
+
+```
+
+
+
+```{r echo=FALSE}
+df %>%
+  ggplot(aes(x=x))+
+  geom_line(aes(y=`value`,colour = `serie`))+
+  labs(x= "Año",y = "Rendimiento", title = "Rendimiento Anual PIB y BOLSAA.MX")+
+  theme_classic()+
+  theme(legend.title = element_text(size=12, color = "salmon", face="bold"),
+           legend.justification=c(0,1), 
+           legend.position=c(0.75, 0.95),
+           legend.background = element_blank(),
+           legend.key = element_blank())
+```
+
+
 
