@@ -6,6 +6,9 @@ output: rmdformats::robobook
 theme: cosmo
 ---
 
+# Introducción 
+
+"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ### Carga de paqueterías para cargar datos y graficar
@@ -33,14 +36,21 @@ getSymbols("BOLSAA.MX", from = '2008-06-13',
            auto.assign = TRUE)
 ```
 
-# Análisis histórico del precio y de los rendimientos de Bolsa Mexicana de Valores. Causas de cambios
+# Análisis histórico del precio y de los rendimientos de Bolsa Mexicana de Valores. 
+En la siguiente tabla, se muestran los precios diarios del activo, en el cual creemos util visualizar. 
+Obtuvimos la información, mediante la importación  de datos por medio de Yahoo Finance. 
 ```{r echo=FALSE, message=FALSE, include = FALSE}
 clave <- c("BOLSAA.MX")
 getSymbols(clave, warnings = FALSE)
 lista <- lapply(clave, function(x) Cl(get(x)))
 precio <- (do.call(merge,lista))
 ```
+# Causas de cambios
+Gracias al la gran pandemia de COVID-19 y la gran incertidumbre que causó, además del continuo crecimiento de la inflación, por lo tanto, distintos inversionistas extranjeros decidieron retirar sus inversiones de tres mil 32 millones de dólares de la bolsa mexicana de valores, lo cual suponemos que fue una de las muchas causas que pudo provocar la caída del precio en  este activo. Por otro lado, otro acontecimiento que pudo igualmente afectar,fue el acuerdo de OCDE (Organización para la Cooperación y el Desarrollo Económicos) que realizó Biden, para que las grandes tecnológicas paguen un 15% de impuesto de sociedades
 
+
+# Rendimientos logaritmicos
+Decidimos realizar el cálculo de los rendimientos logaritmicos, principalmente porque ha diferencia del rendimiento simple, este suma la rentabilidad  de los distintos periodos  para así dar la rentabilidad  total.
 ```{r echo=FALSE}
 chart_Series(BOLSAA.MX,name = paste("Rendimientos logarítmicos de " ,clave))
 ```
@@ -82,7 +92,8 @@ df <-df%>%
 
 ```
 
-
+#Rendimiento Anual PIB vs BOLSAA.MX
+En la siguiente grafica, se muestra una comparativa del rendimiento anual del PIB y los precios del activo, creemos que es conveniente realizar este analisis, principalmente, porque podemos encontrar una correlación entre los datos y así suponer que posiblemente  las caidas de los precios se deba a la disminución de los bienes y servicios en el país.
 
 ```{r echo=FALSE}
 df %>%
@@ -96,6 +107,5 @@ df %>%
            legend.background = element_blank(),
            legend.key = element_blank())
 ```
-
 
 
