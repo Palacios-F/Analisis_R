@@ -46,7 +46,7 @@ ggplot(datos)+
   labs(x= "Tiempo",y = "dW", title = "Proceso de Wiener")
 ```
 
-## Proceso de Wiener Generalizad
+## Proceso de Wiener Generalizado
 
 ¿cómo sería W? $$W_t = W_{t-1} +dW_t$$
 
@@ -125,18 +125,123 @@ mean((50<Xa)&(Xa<=51))
 I) A company’s cash position, measured in millions of dollars, follows a generalized. Wiener process with a drift rate of 0.5 per quarter and a variance rate of 4.0 per quarter. How high does the company’s initial cash position have to be for the company to have a less than 5% chance of a negative cash position by the end of 1 year? To solve this, follow the next steps;
 
 1) Identify a and b for the generalized Wiener Process.
-2) Write the equation dx using a and b. That equation helps us to solve the problem and is specific for this problem. 
+
+Para el proceso de Wiener Generalizado se tiene la siguiente forma
+
+$$ dX = adt+bdw$$
+
+dado que a corresponde al drift rate y b la razón de varianza entonces a corresponde a 0.5 y b a 4.0
+
+2) Write the equation dx using a and b. That equation helps us to solve the problem and is specific for this problem.
+
+$$ dX = 0.5dt+4dw$$
+
 3) Using 2) write the equation dx when dt=4 (fourth quarters or one year)
+
+$$ dX = 0.5(4)+4\sqrt(4)\epsilon$$
 4) Suppose that the initial cash position is Xo. Write the equation for X (not for dx)
+$$ X = X_0 +0.5(4)+4\sqrt(4)\epsilon$$
+
 5) Find the expected value and variance of X
+$$ E[X] = E[X_0 +0.5(4)+4\sqrt(4)\epsilon]$$
+$$ E[X] = E[X_0] +E[0.5(4)]+E[4\sqrt(4)\epsilon]$$
+$$ E[X] = X_0 +0.5(4)+0$$
+$$ E[X] = X_0 +2$$
+
+$$ Var[X] = Var[X_0 +0.5(4)+4\sqrt(4)\epsilon]$$
+$$ Var[X] = Var[X_0] Var[+0.5(4)]+Var[4\sqrt(4)\epsilon]$$
+$$ Var[X] = 0+0+Var[4\sqrt(4)\epsilon]$$
+$$ Var[X] = 64Var[\epsilon]$$
+$$ Var[X] = 64$$
 6) Using 5) find P(X<0). Normalize and use normal standard distribution. If you are doing good, you should get a result that depends on Xo. Now your job is to find this value. 
+
+$$P(X<0)=\frac{0-X_0-2}{2\sqrt{2}}$$
+
 7) Equalize de result on 6) to -1.65 (because you want less than 5% chance of a negative position). And solve for Xo.
+$$-1.65=\frac{-X_0-2}{2\sqrt{2}}$$
+$$-1.65(2\sqrt{2})=-X_0-2$$
+$$-1.65(2\sqrt{2})+2=-X_0$$
+$$X_0=1.65(2\sqrt{2})-2$$
+
+$$X_0 = 2.6669$$
 8) Use R to prove your answer. Simulate the equation X=Xo+adt+bdW using the Xo you found on 7) with dt=4 and a,b for the problem. Once you have at least 10000 simulations for X, calculate its mean and variance. Finally, use pnorm(0, mean(X), sd(X)) to find the probability that X (initial cash position) has to be less than zero. 
+
+```{r}
+epsilon <- rnorm(n=10000, mean = 0, sd = 1)
+X <- 2.6669+2+2*sqrt(2)*epsilon
+```
+
+```{r}
+mean(X)
+var(X)
+```
+
+¿Cuáles son las probabilidades de que el cambio en X sea mayor a cero?
+```{r}
+mean(X<0)
+```
+Se puede observar que el valor es muy cercano al 5% de probabilidad del problema, no se acerca estrictamente por el número de simulaciones, si se aumentaran este número sería más cercano, sin embargo el valor se acerca
 
 ### Segundo
 II) A company’s cash position, measured in millions of dollars, follows a generalized Wiener process with a drift rate of 0.1 per month and a variance rate of 0.16 per month. The initial cash position is 2.0.
 
 (a) What are the probability distributions of the cash position after 1 month, 6 months, and 1 year?
+
+Considerando los datos anteriores el anterior poblema se puede modelar de la siguiente forma:
+$$ X = 2 +0.1dt+0.16dW$$
+Para determinar las distirbuciones de probabilidad para cada uno de los periodos hay que calcular las esperanzas y varianzas para cada uno.
+
+Para dt = 1 mes
+$$ X_1 = 2 +0.1(1)+0.16\epsilon$$
+Haciendo los calculos
+$$E[X_1]=2.1$$
+$$Var[X_1]=(0.16)^2$$
+Por tanto para el primer mes sigue una distribución $N(2.1,0.16)$
+
+Para dt = 6 meses
+$$ X = 2 +0.1(6)+0.16\sqrt{6}\epsilon$$
+$$E[X_6]=2.6$$
+$$Var[X_6]=(0.3919)^2$$
+Por tanto para el primer mes sigue una distribución $N(2.6,0.3919)$
+
+Para dt = 12 meses
+$$ X = 2 +0.1(12)+0.16\sqrt{12}\epsilon$$
+$$E[X_{12}]=3.2$$
+$$Var[X_{12}]=(0.5543)^2$$
+Por tanto para el primer mes sigue una distribución $N(3.2,0.5543)$
+
 (b) What are the probabilities of a negative cash position at the end of 6 months and 1 year?
+
+$$P(X<0)=P(\frac{0-2.6}{0.16})=P(\frac{-2.6}{0.16})=P(-6.63)=1.6784(10)^{-11}$$
+
+$$P(X<0)=P(\frac{0-2.6}{0.16})=P(\frac{-3.2}{0.5543})=P(-5.773)=3.8936(10)^{-9}$$
 (c) Use R to simulate the process and make a graph where you can see the relation between t form 1 to 40 months and the evolution of the probability 
 Hint: to solve this problem, use the same steps on I)
+```{r}
+t = seq(from = 1, to = 40, by = 1)
+X_mean = 2+0.1*t
+X_68u = 2 +0.1*t+0.16*t**0.5
+X_68l = 2 +0.1*t-0.16*t**0.5
+X_95u = 2 +0.1*t+2*0.16*t**0.5
+X_95l = 2 +0.1*t-2*0.16*t**0.5
+X_99u = 2 +0.1*t+3*0.16*t**0.5
+X_99l = 2 +0.1*t-3*0.16*t**0.5
+```
+
+```{r}
+ggplot()+
+  geom_line(aes(x=t,y=X_68u,color = "68%"))+
+  geom_line(aes(x=t,y=X_68l,color= "68%"))+
+  geom_line(aes(x=t,y=X_95u, color = "95%"))+
+  geom_line(aes(x=t,y=X_95l, color = "95%"))+
+  geom_line(aes(x=t,y=X_99u, color = "99%"))+
+  geom_line(aes(x=t,y=X_99l, color = "99%"))+
+  geom_line(aes(x=t,y=X_mean))+
+  labs(x= "Mes(t)",y = "X", title = "Evolución de la distribución de la posición segun intervarlos de confianza")+
+  theme_classic()
+```
+
+
+
+
+
